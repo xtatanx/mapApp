@@ -1,0 +1,17 @@
+{
+  "name": "mapApp",
+  "version": "0.0.1",
+  "description": "Map in realtime with scket io",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "map",
+    "socket-io",
+    "real",
+    "time"
+  ],
+  "author": "Jhonnatan Gonzalez",
+  "license": "ISC"
+}
