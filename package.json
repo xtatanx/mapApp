@@ -12,6 +12,16 @@
     "real",
     "time"
   ],
+  "repository" :
+  { "type" : "git"
+  , "url" : "http://github.com/xtatanx/mapApp.git"
+  },
   "author": "Jhonnatan Gonzalez",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "~3.4.8"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.4"
+  }
 }
