@@ -4,7 +4,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-stylus');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-autoprefixer');
-	grunt.loadNpmTasks('grunt-express-server');
+	grunt.loadNpmTasks('grunt-nodemon');
+	grunt.loadNpmTasks('grunt-concurrent');
 
 	// PROJECT CONFIGURATION
 	grunt.initConfig({
@@ -33,30 +34,41 @@ module.exports = function(grunt) {
 					livereload: true
 				},
 
-				files:['*.html', 'css/*.css', 'js/*.js']
-			},
+				files:['.rebooted','public/*.html', 'public/css/*.css', 'public/js/*.js']
+			}	
+		},
 
-			reload:{
-				files:['*.html', 'css/*.css', 'js/*.js'],
-				tasks: ['express:dev'],
-				options:{
-					spawn: false
-				}
-			}		
-		}	,
-
-		express:{
+		nodemon:{
 			dev:{
+				script:'app.js'
+			}
+		},
+
+		concurrent:{
+			dev:{
+				tasks:['nodemon', 'watch'],
 				options:{
-					script: 'app.js'
+					logConcurrentOutput: true
+				},
+				callback: function(nodemon){
+
+					nodemon.on('log', function(event){
+						console.log(event.colour);
+					});	
+					nodemon.on('restar', function(){
+						setTimeout(function(){
+							require('fs').fs.writeFileSync('.rebooted','rebooted');
+						}, 1000);
+
+					});
+
 				}
 			}
-		}	
+		}
 	});
 
 	// MY TASKS
-	grunt.registerTask('observer', 'watch');
+	grunt.registerTask('observer', 'concurrent');
 	grunt.registerTask('preproccess', ['stylus', 'autoprefixer']);
-	grunt.registerTask('createServer', ['express:dev', 'watch']);
 
 };
