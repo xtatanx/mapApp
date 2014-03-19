@@ -6,4 +6,4 @@
 
 3. Open terminal and navigate to the project folder, run **"npm install"** (This will install all modules required).
 
-4. Run in terminal in the folder project **"grunt observer"**, this will run the server, preprocces with stylu, restar server on changes and reload the server.
+4. Run in terminal in the folder project **"grunt observer"**, this will run the server, preprocces with stylus, restart server on changes and reload the server.
