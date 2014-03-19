@@ -7,17 +7,26 @@ $(function(){
 		maxZoom:18
 	});
 
-	var icon = L.icon({
-		iconUrl: '../../img/marker-icon.png',
-		shadowUrl: '../../img/marker-shadow.png',
-		iconRetinaUrl: '../../img/marker-icon2x.png'
-	});
 
 	// add an OpenStreetMap tile layer
 	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 	    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 	}).addTo(map);
 
+	// change the default path of marker images
+	L.Icon.Default.imagePath = '../img';
+
+	// get user current location
+	map.locate({setView:true, maxZoom:2, enableHighgAccuracy:true});
+	map.on('locationfound', onLocationFound);
+
+	// function to execute after get location
+	function onLocationFound(e){
+		console.log(e);
+		var lat = e.latitude;
+		var lng = e.longitude;
+		createMarker(lat, lng);
+	}
 
 	/* if The client support sockets create a connection */
 	if(Modernizr.websockets){
@@ -29,11 +38,15 @@ $(function(){
 			var lat = Math.floor((Math.random()*50)+1);
 			var lng = Math.floor((Math.random()*50)+1);;
 
-			var marker = L.marker([lat,lng], {icon: icon}).addTo(map);
-			console.log(marker);
+			createMarker(lat, lng);
 		});
 
 		socket.emit('send:coords', {msg:'hello'});
+	}
+
+	// helper function for creating markers
+	function createMarker(lat, lng){
+		var marker = L.marker([lat,lng]).addTo(map);
 	}
 
 });
