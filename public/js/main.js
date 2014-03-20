@@ -31,7 +31,7 @@ $(function(){
 	/* if The client support sockets create a connection */
 	if(Modernizr.websockets){
 		/* client socket */
-		var socket = io.connect('http://localhost:3000');
+		var socket = io.connect('/');
 
 		socket.on('load:coords', function(data){
 			console.log(data);
