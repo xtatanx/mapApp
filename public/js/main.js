@@ -17,17 +17,12 @@ $(function(){
 	L.Icon.Default.imagePath = '../img';
 
 	// get user current location
-	map.locate({setView:true, maxZoom:2, enableHighgAccuracy:true});
+	map.locate({setView:true, maxZoom:16, enableHighgAccuracy:true});
 	map.on('locationfound', onLocationFound);
 
-	// function to execute after get location
-	function onLocationFound(e){
-		console.log(e);
-		var lat = e.latitude;
-		var lng = e.longitude;
-		createMarker(lat, lng);
-	}
 
+
+	var coords = coords || {};
 	/* if The client support sockets create a connection */
 	if(Modernizr.websockets){
 		/* client socket */
@@ -36,18 +31,22 @@ $(function(){
 
 		socket.on('load:coords', function(data){
 			console.log(data);
-			var lat = Math.floor((Math.random()*50)+1);
-			var lng = Math.floor((Math.random()*50)+1);;
-
-			createMarker(lat, lng);
+			createMarker(data.lat, data.lng);
 		});
 
-		socket.emit('send:coords', {msg:'hello'});
+		socket.emit('send:coords', coords);
 	}
 
 	// helper function for creating markers
 	function createMarker(lat, lng){
 		var marker = L.marker([lat,lng]).addTo(map);
 	}
+
+	// function to execute after get location
+	function onLocationFound(e){
+		coords.lat = e.latitude;
+		coords.lng = e.longitude;
+		createMarker(coords.lat, coords.lng);
+	}	
 
 });
