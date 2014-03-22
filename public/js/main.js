@@ -35,12 +35,12 @@ $(function(){
 
 	// function to execute after get location
 	function onLocationFound(e){
-		// sendData.lat = e.latitude;
-		// sendData.lng = e.longitude;
+		sendData.lat = e.latitude;
+		sendData.lng = e.longitude;
 
 		// random numbers local testing
-		sendData.lat = Math.floor((Math.random()* 50) +1);
-		sendData.lng = Math.floor((Math.random()* 50) +1);		
+		// sendData.lat = Math.floor((Math.random()* 50) +1);
+		// sendData.lng = Math.floor((Math.random()* 50) +1);		
 		sendData.id = id;
 		console.log(sendData);
 		// createMarker(sendData.lat, sendData.lng);
