@@ -5,6 +5,7 @@ var port = Number(process.env.PORT || 5000)
 var server = http.createServer(app).listen(port);
 var io = require('socket.io').listen(server);
 
+var connections = [];
 
 app.configure(function(){
 	app.use('/', express.static(__dirname + '/public'));
@@ -16,10 +17,12 @@ app.configure('development', function(){
 
 /* socket function */
 io.sockets.on('connection', function(socket){
-	/* every time someone connects place a marker in the map */
+	/* every time server reciebe data emit to all  */
 	socket.on('send:coords', function(data){
-		socket.broadcast.emit('load:coords', data);
+		connections.push(data);
+		socket.emit('load:coords', connections);
 	});
+	socket.emit('load:coords', connections);
 
 });
 
