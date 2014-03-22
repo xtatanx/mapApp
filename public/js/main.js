@@ -24,18 +24,7 @@ $(function(){
 
 	var coords = coords || {};
 	/* if The client support sockets create a connection */
-	if(Modernizr.websockets){
-		/* client socket */
-		var host = location.origin.replace(/^http/, 'ws');
-		var socket = io.connect(host);
 
-		socket.on('load:coords', function(data){
-			console.log(data);
-			createMarker(data.lat, data.lng);
-		});
-
-		socket.emit('send:coords', coords);
-	}
 
 	// helper function for creating markers
 	function createMarker(lat, lng){
@@ -47,6 +36,23 @@ $(function(){
 		coords.lat = e.latitude;
 		coords.lng = e.longitude;
 		createMarker(coords.lat, coords.lng);
+		createConnection();
+	}
+
+	/* function to connect the socket*/
+	function createConnection(){
+		if(Modernizr.websockets){
+			/* client socket */
+			var host = location.origin.replace(/^http/, 'ws');
+			var socket = io.connect(host);
+
+			socket.emit('send:coords', coords);
+
+			socket.on('load:coords', function(data){
+				console.log(data);
+				createMarker(data.lat, data.lng);
+			});
+		}
 	}	
 
 });
