@@ -19,12 +19,31 @@ app.configure('development', function(){
 io.sockets.on('connection', function(socket){
 	/* every time server reciebe data emit to all  */
 	socket.on('send:coords', function(data){
-		connections.push(data);
-		socket.emit('load:coords', connections);
+		// if id doesnt exist in connections push it
+		if(!checkAvalibility(data.id)){
+			connections.push(data);
+		}
+
+		io.sockets.emit('load:coords', connections);
 	});
-	socket.emit('load:coords', connections);
+
+	socket.on('disconnect', function(){
+		io.sockets.emit('user:disconnected');
+	});	
 
 });
+
+
+// helper function to check if id exist in array
+function checkAvalibility(id){
+	for (var i = 0; i < connections.length; i++){
+			if(connections[i].id === id){
+				return true;
+			}
+	}
+	return false;
+}
+
 
 
 
