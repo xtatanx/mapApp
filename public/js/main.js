@@ -10,8 +10,7 @@ $(function(){
 	// create a map in the "map" div, set the view to a given place and zoom
 	var map = L.map('map',{
 		center:[0,0],
-		zoom:2,
-		minzoom:2,
+		zoom:16,
 		maxZoom:18
 	});
 
@@ -25,7 +24,7 @@ $(function(){
 	L.Icon.Default.imagePath = '../img';
 
 	// get user current location
-	map.locate({setView:true, maxZoom:16, enableHighgAccuracy:true});
+	map.locate({setView:true, maxZoom:15, enableHighgAccuracy:true});
 	map.on('locationfound', onLocationFound);
 
 	// helper function for creating markers
@@ -36,18 +35,13 @@ $(function(){
 	// function to execute after get location
 	function onLocationFound(e){
 		sendData.lat = e.latitude;
-		sendData.lng = e.longitude;
-
-		// random numbers local testing
-		// sendData.lat = Math.floor((Math.random()* 50) +1);
-		// sendData.lng = Math.floor((Math.random()* 50) +1);		
+		sendData.lng = e.longitude;		
 		sendData.id = id;
-		console.log(sendData);
 		// createMarker(sendData.lat, sendData.lng);
 		createConnection();
 	}
 
-	/* set  initial markers markers*/
+	/* set  initial markers markers */
 	function setMarkers(connections){
 		for(var i = 0; i < connections.length; i++){
 			createMarker(connections[i].lat, connections[i].lng);
@@ -65,8 +59,12 @@ $(function(){
 			socket.emit('send:coords', sendData);
 
 			socket.on('load:coords', function(data){
-				console.log("aloooooo");
+				console.log(data);
 				setMarkers(data);
+			});
+
+			socket.on('user:disconnected', function(){
+				console.log('disconnected user');
 			});
 		}
 	}	
