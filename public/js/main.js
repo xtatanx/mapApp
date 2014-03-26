@@ -1,5 +1,5 @@
 $(function(){
-	// Neccesary vars
+	// cache some vars
 	var id = Math.random().toString(36).substr(2,16);
 	var sendData = {
 		id:0,
@@ -14,6 +14,8 @@ $(function(){
 		maxZoom:18
 	});
 
+	// someone else positions
+	var someOneElse;
 
 	// add an OpenStreetMap tile layer
 	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -26,6 +28,8 @@ $(function(){
 	// get user current location
 	map.locate({setView:true, maxZoom:15, enableHighgAccuracy:true});
 	map.on('locationfound', onLocationFound);
+
+	$('#search_people').on('click', searchPeople);
 
 	// helper function for creating markers
 	function createMarker(lat, lng){
@@ -60,6 +64,7 @@ $(function(){
 
 			socket.on('load:coords', function(data){
 				console.log(data);
+				someOneElse = data[1];
 				setMarkers(data);
 			});
 
@@ -67,6 +72,16 @@ $(function(){
 				console.log('disconnected user');
 			});
 		}
-	}	
+	}
+
+	/* function to search people near me */
+	function searchPeople(){
+		var lat= sendData.lat;
+		var lng = sendData.lng;
+		var myPosition = L.latLng(lat, lng);
+		var otherPosition = L.latLng(someOneElse.lat, someOneElse.lng); 
+		var distance = myPosition.distanceTo(otherPosition);
+		alert('My distance to second conenction in array is: ' + distance);
+	};	
 
 });
