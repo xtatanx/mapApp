@@ -1,8 +1,6 @@
 $(function(){
 	// cache some vars
-	var id = Math.random().toString(36).substr(2,16);
 	var sendData = {
-		id:0,
 		lat:0,
 		lng:0
 	}
@@ -10,14 +8,14 @@ $(function(){
 	// create a map in the "map" div, set the view to a given place and zoom
 	var map = L.map('map',{
 		center:[0,0],
-		zoom:16,
+		zoom:15,
 		maxZoom:18
 	});
 
-	// other people connections
-	var otherPeople=[];
-	// closest connections
-	var closestConnections = [];
+	// handle connections and id's except mine
+	var connections = [];
+	// store markers currently placed in the map
+	var markers = [];
 
 	// add an OpenStreetMap tile layer
 	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -38,21 +36,36 @@ $(function(){
 		var marker = L.marker([lat,lng]).addTo(map);
 	}
 
+	//  // set  initial markers markers 
+	function setMarkers(connections){
+		for(var i = 0; i < connections.length; i++){
+			var marker={}
+			marker.id = connections[i].id;
+			marker.markerObj = L.marker([connections[i].lat,connections[i].lng]);
+			if(!markerInArray(marker, markers)){
+				markers.push(marker);
+				map.addLayer(marker.markerObj);
+			}
+		}
+
+		console.log(markers);
+	}
+
+	function markerInArray(marker, markers){
+		for(var i = 0; i < markers.length; i++){
+			return (markers[0].id === marker.id);
+		}
+			return false;
+	}	
+
 	// function to execute after get location
 	function onLocationFound(e){
 		sendData.lat = e.latitude;
-		sendData.lng = e.longitude;		
-		sendData.id = id;
-		// createMarker(sendData.lat, sendData.lng);
+		sendData.lng = e.longitude;
+		createMarker(e.latitude, e.longitude);		
 		createConnection();
 	}
 
-	/* set  initial markers markers */
-	function setMarkers(connections){
-		for(var i = 0; i < connections.length; i++){
-			createMarker(connections[i].lat, connections[i].lng);
-		}
-	}
 
 	/* function to connect the socket*/
 	function createConnection(){
@@ -65,12 +78,15 @@ $(function(){
 			socket.emit('send:coords', sendData);
 
 			socket.on('load:coords', function(data){
-				otherPeople = data;
-				setMarkers(data);
+				console.log(data);
+				connections.push(data);
+				setMarkers(connections);
 			});
 
-			socket.on('user:disconnected', function(){
-				console.log('disconnected user');
+			socket.on('user:disconnected', function(id){
+				console.log('user with id: ' + id + ' got disconnected');
+				removeConnection(id);
+				removeMarker(id);
 			});
 		}
 	}
@@ -86,8 +102,30 @@ $(function(){
 				closestConnections.push(otherPosition);
 			} 
 		}
-
 		console.log(closestConnections);
-	};	
+	}
+
+	/* this fucntion connections disconnected based on socket id */
+	function removeConnection(id){
+		for(var i = 0; i < connections.length; i++){
+			console.log('connections before remove: ');
+			console.log(connections);
+			if(connections[i].id === id){
+				connections.splice(connections[i], 1);	
+			}
+		}
+		console.log('connections after remove: ');
+		console.log(connections);
+	}
+
+	/* function to remove markers already placed in map */
+	function removeMarker(id){
+		for(var i = 0; i < markers.length; i++){
+			if(markers[i].id === id){
+				map.removeLayer(markers[i].markerObj);
+				markers.splice(markers[i], 1);
+			}
+		}
+	}			
 
 });
