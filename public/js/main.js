@@ -14,8 +14,10 @@ $(function(){
 		maxZoom:18
 	});
 
-	// someone else positions
-	var someOneElse;
+	// other people connections
+	var otherPeople=[];
+	// closest connections
+	var closestConnections = [];
 
 	// add an OpenStreetMap tile layer
 	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -63,8 +65,7 @@ $(function(){
 			socket.emit('send:coords', sendData);
 
 			socket.on('load:coords', function(data){
-				console.log(data);
-				someOneElse = data[1];
+				otherPeople = data;
 				setMarkers(data);
 			});
 
@@ -76,12 +77,17 @@ $(function(){
 
 	/* function to search people near me */
 	function searchPeople(){
-		var lat= sendData.lat;
-		var lng = sendData.lng;
-		var myPosition = L.latLng(lat, lng);
-		var otherPosition = L.latLng(someOneElse.lat, someOneElse.lng); 
-		var distance = myPosition.distanceTo(otherPosition);
-		alert('My distance to second conenction in array is: ' + distance);
+		var myPosition = L.latLng(sendData.lat, sendData.lng);
+		var otherConnections = otherPeople;
+		for(var i = 0; i < otherConnections.length; i++){
+			var otherPosition = L.latLng(otherConnections[i].lat,otherConnections[i].lng);
+			var distance = myPosition.distanceTo(otherPosition);
+			if(distance <= 1000){
+				closestConnections.push(otherPosition);
+			} 
+		}
+
+		console.log(closestConnections);
 	};	
 
 });
