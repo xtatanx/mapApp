@@ -4,14 +4,16 @@ $(function(){
 		lat:0,
 		lng:0
 	}
-
 	// create a map in the "map" div, set the view to a given place and zoom
 	var map = L.map('map',{
 		center:[0,0],
 		zoom:15,
 		maxZoom:18
 	});
-
+	// host that socket use to connect 
+	var host = location.origin.replace(/^http/, 'ws');
+	// reference to the socket
+	var socket;
 	// handle connections and id's except mine
 	var connections = [];
 	// store markers currently placed in the map
@@ -74,8 +76,7 @@ $(function(){
 		/* if The client support sockets create a connection */
 		if(Modernizr.websockets){
 			/* client socket */
-			var host = location.origin.replace(/^http/, 'ws');
-			var socket = io.connect(host);
+			socket = io.connect(host);
 
 			socket.emit('send:coords', sendData);
 
@@ -83,6 +84,10 @@ $(function(){
 				// add data as a new connection
 				connections.push(data);
 				setMarkers(connections);
+			});
+
+			socket.on('alert:msg', function(message){
+				alert(message);
 			});
 
 			socket.on('user:disconnected', function(id){
@@ -100,13 +105,13 @@ $(function(){
 			var otherPosition = L.latLng(connections[i].lat,connections[i].lng);
 			// distance betwen my position and someone else's position
 			var distance = myPosition.distanceTo(otherPosition);
-			console.log(distance);
 			if(distance <= 1000){
 				// push user id, lat and lng to closestConnections
 				closestConnections.push(connections[i]);
 			} 
 		}
 		console.log(closestConnections);
+		socket.emit('closest:people', closestConnections);
 	}
 
 	/* this function remove  connections disconnected based on socket id */
@@ -128,6 +133,6 @@ $(function(){
 				markers.splice(i, 1);
 			}
 		}
-	}			
+	}		
 
 });
