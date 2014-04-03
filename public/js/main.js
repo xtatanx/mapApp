@@ -16,6 +16,8 @@ $(function(){
 	var connections = [];
 	// store markers currently placed in the map
 	var markers = [];
+	// store the closest conenctions to my position
+	var closestConnections = [];
 
 	// add an OpenStreetMap tile layer
 	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -36,7 +38,7 @@ $(function(){
 		var marker = L.marker([lat,lng]).addTo(map);
 	}
 
-	//  // set  initial markers markers 
+	// set  initial markers markers 
 	function setMarkers(connections){
 		for(var i = 0; i < connections.length; i++){
 			var marker={}
@@ -47,10 +49,9 @@ $(function(){
 				map.addLayer(marker.markerObj);
 			}
 		}
-
-		console.log(markers);
 	}
 
+	//  check if marker id already exists in markers array
 	function markerInArray(marker, markers){
 		for(var i = 0; i < markers.length; i++){
 			return (markers[0].id === marker.id);
@@ -62,7 +63,8 @@ $(function(){
 	function onLocationFound(e){
 		sendData.lat = e.latitude;
 		sendData.lng = e.longitude;
-		createMarker(e.latitude, e.longitude);		
+		createMarker(e.latitude, e.longitude);
+		// initialize a socket connection 
 		createConnection();
 	}
 
@@ -78,13 +80,13 @@ $(function(){
 			socket.emit('send:coords', sendData);
 
 			socket.on('load:coords', function(data){
-				console.log(data);
+				// add data as a new connection
 				connections.push(data);
 				setMarkers(connections);
 			});
 
 			socket.on('user:disconnected', function(id){
-				console.log('user with id: ' + id + ' got disconnected');
+				// if user get deisconnected remove its connection and its marker
 				removeConnection(id);
 				removeMarker(id);
 			});
@@ -94,24 +96,25 @@ $(function(){
 	/* function to search people near me */
 	function searchPeople(){
 		var myPosition = L.latLng(sendData.lat, sendData.lng);
-		var otherConnections = otherPeople;
-		for(var i = 0; i < otherConnections.length; i++){
-			var otherPosition = L.latLng(otherConnections[i].lat,otherConnections[i].lng);
+		for(var i = 0; i < connections.length; i++){
+			var otherPosition = L.latLng(connections[i].lat,connections[i].lng);
+			// distance betwen my position and someone else's position
 			var distance = myPosition.distanceTo(otherPosition);
+			console.log(distance);
 			if(distance <= 1000){
-				closestConnections.push(otherPosition);
+				// push user id, lat and lng to closestConnections
+				closestConnections.push(connections[i]);
 			} 
 		}
 		console.log(closestConnections);
 	}
 
-	/* this fucntion connections disconnected based on socket id */
+	/* this function remove  connections disconnected based on socket id */
 	function removeConnection(id){
 		for(var i = 0; i < connections.length; i++){
 			if(connections[i].id == id){
+				// delete connection located in i index in connections
 				connections.splice(i, 1);
-				console.log('::::::::: connections after splice ::::::::');
-				console.log(connections);
 			}
 		}
 	}
@@ -121,6 +124,7 @@ $(function(){
 		for(var i = 0; i < markers.length; i++){
 			if(markers[i].id === id){
 				map.removeLayer(markers[i].markerObj);
+				// delete marker located in i index in markers
 				markers.splice(i, 1);
 			}
 		}
