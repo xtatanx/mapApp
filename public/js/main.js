@@ -108,14 +108,12 @@ $(function(){
 	/* this fucntion connections disconnected based on socket id */
 	function removeConnection(id){
 		for(var i = 0; i < connections.length; i++){
-			console.log('connections before remove: ');
-			console.log(connections);
-			if(connections[i].id === id){
-				connections.splice(connections[i], 1);	
+			if(connections[i].id == id){
+				connections.splice(i, 1);
+				console.log('::::::::: connections after splice ::::::::');
+				console.log(connections);
 			}
 		}
-		console.log('connections after remove: ');
-		console.log(connections);
 	}
 
 	/* function to remove markers already placed in map */
@@ -123,7 +121,7 @@ $(function(){
 		for(var i = 0; i < markers.length; i++){
 			if(markers[i].id === id){
 				map.removeLayer(markers[i].markerObj);
-				markers.splice(markers[i], 1);
+				markers.splice(i, 1);
 			}
 		}
 	}			
