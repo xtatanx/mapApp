@@ -21,6 +21,12 @@ io.sockets.on('connection', function(socket){
 		socket.broadcast.emit('load:coords', data);
 	});
 
+	socket.on('closest:people', function(data){
+		for(var i = 0; i < data.length; i++){
+			io.sockets.socket(data[i].id).emit('alert:msg', 'you are near someone else');
+		}
+	});
+
 	socket.on('disconnect', function(){
 		socket.broadcast.emit('user:disconnected', socket.id);
 	});	
