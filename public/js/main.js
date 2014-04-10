@@ -1,42 +1,62 @@
 $(function(){
-	// cache some vars
+	// CACHE SOME VARIABLES
 	var sendData = {
 		lat:0,
 		lng:0
 	}
-	// create a map in the "map" div, set the view to a given place and zoom
-	var map = L.map('map',{
-		center:[0,0],
-		zoom:15,
-		maxZoom:18
-	});
+
 	// host that socket use to connect 
 	var host = location.origin.replace(/^http/, 'ws');
+
 	// reference to the socket
 	var socket;
+
 	// handle connections and id's except mine
 	var connections = [];
+
 	// store markers currently placed in the map
 	var markers = [];
+
 	// store the closest conenctions to my position
 	var closestConnections = [];
+
+	// create a map in the "map" div, set the view to Bogota
+	var map = new GMaps({
+	  div: '#map',
+	  lat: 4.596974,
+	  lng: -74.072978,
+	  zoom: 15
+	});
+
+	// geolocate the conenction and place amrker in the map
+	GMaps.geolocate({
+	  success: function(position) {
+	  	// store data to send to other sockets
+			sendData.lat = position.coords.latitude;
+			sendData.lng = position.coords.longitude;
+
+			// center map in current lat and ln
+			map.setCenter(sendData.lat, sendData.lng);
+
+			// create marker on client position
+			createMarker(sendData.lat, sendData.lng);
+
+			// initialize a socket connection 
+			createConnection();
+	  },
+	  error: function(error) {
+	    alert('Geolocation failed: '+error.message);
+	  },
+	  not_supported: function() {
+	    alert("Your browser does not support geolocation");
+	  }
+	});	
 
 	// reference to my position input
 	var $mypos = $('#mypos');
 	//  reference to geosearch form
 	var $form = $('#geoSearch_form');
 
-	// add an OpenStreetMap tile layer
-	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-	    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	}).addTo(map);
-
-	// change the default path of marker images
-	L.Icon.Default.imagePath = '../img';
-
-	// get user current location
-	map.locate({setView:true, maxZoom:15, enableHighgAccuracy:true});
-	map.on('locationfound', onLocationFound);
 
 	// search peopl enear me
 	$('#search_people').on('click', searchPeople);
@@ -66,7 +86,10 @@ $(function(){
 
 	// helper function for creating markers
 	function createMarker(lat, lng){
-		var marker = L.marker([lat,lng]).addTo(map);
+		map.addMarker({
+		  lat: lat,
+		  lng: lng
+		});
 	}
 
 	// set  initial markers markers 
@@ -74,10 +97,9 @@ $(function(){
 		for(var i = 0; i < connections.length; i++){
 			var marker={}
 			marker.id = connections[i].id;
-			marker.markerObj = L.marker([connections[i].lat,connections[i].lng]);
 			if(!markerInArray(marker, markers)){
 				markers.push(marker);
-				map.addLayer(marker.markerObj);
+				marker.markerObj = map.addMarker({lat:connections[i].lat, lng:connections[i].lng});
 			}
 		}
 	}
@@ -90,18 +112,10 @@ $(function(){
 			return false;
 	}	
 
-	// function to execute after get location
-	function onLocationFound(e){
-		sendData.lat = e.latitude;
-		sendData.lng = e.longitude;
-		createMarker(e.latitude, e.longitude);
-		// initialize a socket connection 
-		createConnection();
-	}
-
 
 	/* function to connect the socket*/
 	function createConnection(){
+
 		/* if The client support sockets create a connection */
 		if(Modernizr.websockets){
 			/* client socket */
@@ -157,7 +171,7 @@ $(function(){
 	function removeMarker(id){
 		for(var i = 0; i < markers.length; i++){
 			if(markers[i].id === id){
-				map.removeLayer(markers[i].markerObj);
+				map.removeMarker(markers[i].markerObj);
 				// delete marker located in i index in markers
 				markers.splice(i, 1);
 			}

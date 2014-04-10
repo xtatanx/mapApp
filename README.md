@@ -10,4 +10,4 @@
 
 # To Dos
 
-- switch omplementation of maps and geocoding from leafletmaps to google maps, geocoding and geolocation is so important to a project like this and google already has the tools to do it.
+- find people near me using google maps
