@@ -21,6 +21,11 @@ $(function(){
 	// store the closest conenctions to my position
 	var closestConnections = [];
 
+	// reference to my position input
+	var $mypos = $('#mypos');
+	//  reference to geosearch form
+	var $form = $('#geoSearch_form');
+
 	// add an OpenStreetMap tile layer
 	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 	    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -33,7 +38,31 @@ $(function(){
 	map.locate({setView:true, maxZoom:15, enableHighgAccuracy:true});
 	map.on('locationfound', onLocationFound);
 
+	// search peopl enear me
 	$('#search_people').on('click', searchPeople);
+
+	$form.on('submit', function(e){
+		e.preventDefault();
+		var adress = $mypos.val();
+
+		parseAdress(adress, searchAdress);
+
+	});
+
+	function parseAdress(adress, callback){
+		// parse adress to send right parameters
+		console.log('parsing adress: ' + adress);
+
+		if(callback && typeof(callback) === 'function'){
+			callback(adress);
+		}
+	}
+
+	function searchAdress(adress){
+		$.getJSON('http://nominatim.openstreetmap.org/reverse?format=json&lat=' + 4.754149 + '&lon='+ -74.047145 +'&addressdetails=1' , function(data) {
+			console.log(data);
+		});
+	}
 
 	// helper function for creating markers
 	function createMarker(lat, lng){
