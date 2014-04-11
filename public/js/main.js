@@ -48,6 +48,11 @@
 			// create marker on client position
 			createMarker(sendData.lat, sendData.lng);
 
+			// search for my adress and place it in the input 'tu ubicacion'
+			searchAdress([sendData.lat, sendData.lng], function(adress){
+				$mypos.val('adress');
+			});
+
 			// initialize a socket connection 
 			createConnection();
 	  },
@@ -76,7 +81,7 @@
 		e.preventDefault();
 		var adress = $mypos.val();
 
-		parseAdress(adress, searchAdress);
+		parseAdress(adress);
 
 	});
 
@@ -102,20 +107,22 @@
 		return d; 
 	}
 
-	function parseAdress(adress, callback){
+	function searchAdress(adress){
 		// parse adress to send right parameters
 		console.log('parsing adress: ' + adress);
 
-		if(callback && typeof(callback) === 'function'){
-			callback(adress);
-		}
-	}
+		GMaps.geocode({
+		  lat: adress[0],
+		  lng: adress[1],
+		  callback: function(results, status) {
+		  	console.log(results);
+		    if (status === 'OK') {
+	    		$mypos.val(results[0].formatted_address);
+		    }
+		  }
+		});		
+}
 
-	function searchAdress(adress){
-		$.getJSON('http://nominatim.openstreetmap.org/reverse?format=json&lat=' + 4.754149 + '&lon='+ -74.047145 +'&addressdetails=1' , function(data) {
-			console.log(data);
-		});
-	}
 
 	// helper function for creating markers
 	function createMarker(lat, lng){
