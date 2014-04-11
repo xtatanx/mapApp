@@ -107,17 +107,22 @@
 		return d; 
 	}
 
+	// search for adress and place it in input my position
 	function searchAdress(adress){
-		// parse adress to send right parameters
-		console.log('parsing adress: ' + adress);
-
 		GMaps.geocode({
 		  lat: adress[0],
 		  lng: adress[1],
 		  callback: function(results, status) {
 		  	console.log(results);
 		    if (status === 'OK') {
-	    		$mypos.val(results[0].formatted_address);
+		    	var adressArray = results[0].formatted_address.split(" ");
+		    	var adress= "" ;
+		    	//  i could stend string object to concatenate splitted objects like this one
+		    	for(var i = 0; i < 4; i ++){
+		    		adress += adressArray[i] + " ";
+		    	}
+
+	    		$mypos.val(adress);
 		    }
 		  }
 		});		
