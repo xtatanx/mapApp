@@ -1,4 +1,4 @@
-$(function(){
+ $(function(){
 	// CACHE SOME VARIABLES
 	var sendData = {
 		lat:0,
@@ -28,6 +28,13 @@ $(function(){
 	  zoom: 15
 	});
 
+	// to radians
+	if (typeof (Number.prototype.toRad) === "undefined") {
+	    Number.prototype.toRad = function() {
+	        return this * 3.14 / 180;
+	    }
+	}	
+
 	// geolocate the conenction and place amrker in the map
 	GMaps.geolocate({
 	  success: function(position) {
@@ -54,12 +61,16 @@ $(function(){
 
 	// reference to my position input
 	var $mypos = $('#mypos');
+
 	//  reference to geosearch form
 	var $form = $('#geoSearch_form');
 
+	// reference to search people btn
+	var $search_btn = $("#search_people");
+
 
 	// search peopl enear me
-	$('#search_people').on('click', searchPeople);
+	$search_btn.on('click', searchPeople);
 
 	$form.on('submit', function(e){
 		e.preventDefault();
@@ -68,6 +79,27 @@ $(function(){
 		parseAdress(adress, searchAdress);
 
 	});
+
+	// harvesina formula to calculate distances betwen point a and b
+	function calcDistance(point1, point2){
+		var lat2 = point1[0]; 
+		var lon2 = point1[1]; 
+		var lat1 = point2[0]; 
+		var lon1 = point2[1]; 
+
+		var R = 6371; // radius of earth in km 
+
+		var x1 = lat2-lat1;
+		var dLat = x1.toRad();  
+		var x2 = lon2-lon1;
+		var dLon = x2.toRad();  
+		var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+		                Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
+		                Math.sin(dLon/2) * Math.sin(dLon/2);  
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var d = R * c;
+		return d; 
+	}
 
 	function parseAdress(adress, callback){
 		// parse adress to send right parameters
@@ -143,12 +175,12 @@ $(function(){
 
 	/* function to search people near me */
 	function searchPeople(){
-		var myPosition = L.latLng(sendData.lat, sendData.lng);
+		var myPosition = [sendData.lat, sendData.lng]
 		for(var i = 0; i < connections.length; i++){
-			var otherPosition = L.latLng(connections[i].lat,connections[i].lng);
+			var otherPosition = [connections[i].lat, connections[i].lng];
 			// distance betwen my position and someone else's position
-			var distance = myPosition.distanceTo(otherPosition);
-			if(distance <= 1000){
+			var distance = calcDistance(myPosition, otherPosition);
+			if(distance <= 2000){
 				// push user id, lat and lng to closestConnections
 				closestConnections.push(connections[i]);
 			} 
