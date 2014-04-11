@@ -97,7 +97,8 @@
 		                Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
 		                Math.sin(dLon/2) * Math.sin(dLon/2);  
 		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-		var d = R * c;
+		// show number in meters
+		var d = Math.floor((R * c) * 1000); 
 		return d; 
 	}
 
@@ -180,13 +181,18 @@
 			var otherPosition = [connections[i].lat, connections[i].lng];
 			// distance betwen my position and someone else's position
 			var distance = calcDistance(myPosition, otherPosition);
-			if(distance <= 2000){
+			console.log(distance);
+			if(distance <= 2000 ){
+
 				// push user id, lat and lng to closestConnections
 				closestConnections.push(connections[i]);
 			} 
 		}
 		console.log(closestConnections);
+		// emit event to people near me
 		socket.emit('closest:people', closestConnections);
+		// after emit event closest connections return to 0
+		closestConnections = [];
 	}
 
 	/* this function remove  connections disconnected based on socket id */
