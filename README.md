@@ -10,4 +10,4 @@
 
 # To Dos
 
-- find people near me using google maps
+- use geolocation to set where i am and where i go 
