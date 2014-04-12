@@ -35,7 +35,7 @@
 	    }
 	}	
 
-	// geolocate the conenction and place amrker in the map
+	// geolocate the conenction and place marker in the map
 	GMaps.geolocate({
 	  success: function(position) {
 	  	// store data to send to other sockets
@@ -49,7 +49,7 @@
 			createMarker(sendData.lat, sendData.lng);
 
 			// search for my adress and place it in the input 'tu ubicacion'
-			searchAdress([sendData.lat, sendData.lng], function(adress){
+			searchAddressByCoords([sendData.lat, sendData.lng], function(adress){
 				$mypos.val('adress');
 			});
 
@@ -67,6 +67,9 @@
 	// reference to my position input
 	var $mypos = $('#mypos');
 
+	//  reference to destiny input
+	var $destiny = $('#destiny');
+
 	//  reference to geosearch form
 	var $form = $('#geoSearch_form');
 
@@ -79,10 +82,8 @@
 
 	$form.on('submit', function(e){
 		e.preventDefault();
-		var adress = $mypos.val();
-
-		parseAdress(adress);
-
+		var destiny = $destiny.val();
+		searchAddressByString(destiny);
 	});
 
 	// harvesina formula to calculate distances betwen point a and b
@@ -99,16 +100,16 @@
 		var x2 = lon2-lon1;
 		var dLon = x2.toRad();  
 		var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
-		                Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
-		                Math.sin(dLon/2) * Math.sin(dLon/2);  
+            Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);  
 		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
 		// show number in meters
 		var d = Math.floor((R * c) * 1000); 
 		return d; 
 	}
 
-	// search for adress and place it in input my position
-	function searchAdress(adress){
+	// search for address by coordinates and place it in input my position
+	function searchAddressByCoords(adress){
 		GMaps.geocode({
 		  lat: adress[0],
 		  lng: adress[1],
@@ -117,7 +118,7 @@
 		    if (status === 'OK') {
 		    	var adressArray = results[0].formatted_address.split(" ");
 		    	var adress= "" ;
-		    	//  i could stend string object to concatenate splitted objects like this one
+		    	//  i could extend string object to concatenate splitted objects like this one
 		    	for(var i = 0; i < 4; i ++){
 		    		adress += adressArray[i] + " ";
 		    	}
@@ -126,7 +127,21 @@
 		    }
 		  }
 		});		
-}
+	}
+
+
+	// search address by string
+	function searchAddressByString(addressString){
+		GMaps.geocode({
+		  address: addressString,
+		  callback: function(results, status) {
+		    if (status === 'OK') {
+	    	console.log(results[0].geometry.location.k);
+		    	createMarker(results[0].geometry.location.k, results[0].geometry.location.A);
+		    }
+		  }
+		});		
+	}	
 
 
 	// helper function for creating markers
@@ -158,12 +173,12 @@
 	}	
 
 
-	/* function to connect the socket*/
+	// function to connect the socket
 	function createConnection(){
 
-		/* if The client support sockets create a connection */
+		// if The client support sockets create a connection 
 		if(Modernizr.websockets){
-			/* client socket */
+			// client socket 
 			socket = io.connect(host);
 
 			socket.emit('send:coords', sendData);
@@ -186,28 +201,28 @@
 		}
 	}
 
-	/* function to search people near me */
+	// function to search people near me
 	function searchPeople(){
 		var myPosition = [sendData.lat, sendData.lng]
 		for(var i = 0; i < connections.length; i++){
 			var otherPosition = [connections[i].lat, connections[i].lng];
 			// distance betwen my position and someone else's position
 			var distance = calcDistance(myPosition, otherPosition);
-			console.log(distance);
+
 			if(distance <= 2000 ){
 
 				// push user id, lat and lng to closestConnections
 				closestConnections.push(connections[i]);
 			} 
 		}
-		console.log(closestConnections);
+
 		// emit event to people near me
 		socket.emit('closest:people', closestConnections);
 		// after emit event closest connections return to 0
 		closestConnections = [];
 	}
 
-	/* this function remove  connections disconnected based on socket id */
+	//  this function remove  connections disconnected based on socket id 
 	function removeConnection(id){
 		for(var i = 0; i < connections.length; i++){
 			if(connections[i].id == id){
@@ -217,7 +232,7 @@
 		}
 	}
 
-	/* function to remove markers already placed in map */
+	// function to remove markers already placed in map
 	function removeMarker(id){
 		for(var i = 0; i < markers.length; i++){
 			if(markers[i].id === id){
