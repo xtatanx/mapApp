@@ -20,13 +20,26 @@
 	// store the closest conenctions to my position
 	var closestConnections = [];
 
+	// reference to my position input
+	var $mypos = $('#mypos');
+
+	//  reference to destiny input
+	var $destiny = $('#destiny');
+
+	//  reference to geosearch form
+	var $form = $('#geoSearch_form');
+
+	// reference to search people btn
+	var $search_btn = $("#search_people");
+
 	// create a map in the "map" div, set the view to Bogota
-	var map = new GMaps({
+	window.map = new GMaps({
 	  div: '#map',
 	  lat: 4.596974,
 	  lng: -74.072978,
 	  zoom: 15
 	});
+
 
 	// to radians
 	if (typeof (Number.prototype.toRad) === "undefined") {
@@ -64,20 +77,8 @@
 	  }
 	});	
 
-	// reference to my position input
-	var $mypos = $('#mypos');
 
-	//  reference to destiny input
-	var $destiny = $('#destiny');
-
-	//  reference to geosearch form
-	var $form = $('#geoSearch_form');
-
-	// reference to search people btn
-	var $search_btn = $("#search_people");
-
-
-	// search peopl enear me
+	// search people near me
 	$search_btn.on('click', searchPeople);
 
 	$form.on('submit', function(e){
@@ -114,7 +115,6 @@
 		  lat: adress[0],
 		  lng: adress[1],
 		  callback: function(results, status) {
-		  	console.log(results);
 		    if (status === 'OK') {
 		    	var adressArray = results[0].formatted_address.split(" ");
 		    	var adress= "" ;
@@ -133,11 +133,11 @@
 	// search address by string
 	function searchAddressByString(addressString){
 		GMaps.geocode({
-		  address: addressString,
+		  address: addressString + "Bogota, Colombia",
 		  callback: function(results, status) {
 		    if (status === 'OK') {
-	    	console.log(results[0].geometry.location.k);
-		    	createMarker(results[0].geometry.location.k, results[0].geometry.location.A);
+	    		console.log(results[0]);
+		    	createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'destiny');
 		    }
 		  }
 		});		
@@ -145,12 +145,16 @@
 
 
 	// helper function for creating markers
-	function createMarker(lat, lng){
+	function createMarker(lat, lng, typeOfMarker){
+		var id = (typeof(typeOfMarker)) === 'string' ? 'myDestiny' : 'myposition';
 		map.addMarker({
 		  lat: lat,
-		  lng: lng
+		  lng: lng,
+		  id: id
 		});
 	}
+
+	
 
 	// set  initial markers markers 
 	function setMarkers(connections){
