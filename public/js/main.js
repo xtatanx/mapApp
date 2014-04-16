@@ -136,8 +136,15 @@
 		  address: addressString + "Bogota, Colombia",
 		  callback: function(results, status) {
 		    if (status === 'OK') {
-	    		console.log(results[0]);
-		    	createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'destiny');
+		    	console.log(results[0]);
+		    	if(searchByValue('myDestiny', 'id', map.markers)){
+						map.markers[1].setPosition({
+							lat: results[0].geometry.location.k,
+							lng: results[0].geometry.location.A
+						});
+		    	}else{
+    				createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'myDestiny');
+		    	}	    		
 		    }
 		  }
 		});		
@@ -146,7 +153,7 @@
 
 	// helper function for creating markers
 	function createMarker(lat, lng, typeOfMarker){
-		var id = (typeof(typeOfMarker)) === 'string' ? 'myDestiny' : 'myposition';
+		var id = (typeof(typeOfMarker)) === 'string' ? 'myDestiny' : 'myPosition';
 		map.addMarker({
 		  lat: lat,
 		  lng: lng,
@@ -156,25 +163,28 @@
 
 	
 
-	// set  initial markers markers 
+	// set  initial  markers 
 	function setMarkers(connections){
 		for(var i = 0; i < connections.length; i++){
 			var marker={}
 			marker.id = connections[i].id;
-			if(!markerInArray(marker, markers)){
+			if(!searchByValue(marker, 'id', markers)){
 				markers.push(marker);
 				marker.markerObj = map.addMarker({lat:connections[i].lat, lng:connections[i].lng});
 			}
 		}
 	}
 
-	//  check if marker id already exists in markers array
-	function markerInArray(marker, markers){
-		for(var i = 0; i < markers.length; i++){
-			return (markers[0].id === marker.id);
+
+	// check if property value exist  in an array of objects
+	function searchByValue(value, property, array){
+		for(var i = 0; i < array.length; i++){
+			if(array[i][property] === value){
+				return true;
+			}
 		}
-			return false;
-	}	
+		return false;
+	}
 
 
 	// function to connect the socket
