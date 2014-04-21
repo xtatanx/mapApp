@@ -142,24 +142,24 @@
 		  	// check the type of marker and update its position every time the form is submitted
 		    if (status === 'OK' && typeOfMarker === 'myDestiny') {
 		    	if(searchByValue('myDestiny', 'id', map.markers)){
-						map.markers[1].setPosition({
-							lat: results[0].geometry.location.k,
-							lng: results[0].geometry.location.A
-						});
+
+						setMarkerPosition('myDestiny', results[0].geometry.location.k, results[0].geometry.location.A, map.markers);
+
 		    	}else{
     				createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'myDestiny');
 		    	}
 					// pan to myDestiny marker
-		    	map.setCenter(results[0].geometry.location.k, results[0].geometry.location.A);	    		
+		    	map.setCenter(results[0].geometry.location.k, results[0].geometry.location.A);
+		    		    		
 		    }else if (status === 'OK' && typeOfMarker === 'myPosition'){
 		    	if(searchByValue('myPosition', 'id', map.markers)){
-						map.markers[0].setPosition({
-							lat: results[0].geometry.location.k,
-							lng: results[0].geometry.location.A
-						});
+
+						setMarkerPosition('myPosition', results[0].geometry.location.k, results[0].geometry.location.A, map.markers);
 		    	}else{
+
     				createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'myPosition');
 		    	}
+
 		    	sendData.lat = results[0].geometry.location.k;
 		    	sendData.lng = results[0].geometry.location.A;
 		    	socket.emit('changed:coords', sendData);		    	
@@ -226,22 +226,16 @@
 			});
 
 			socket.on('update:coords', function(data){
-				// update position of socket
+				// update array of connected sockets with the new position
 				for (var i = 0; i < connections.length; i++){
 					if(connections[i].id === data.id){
 						connections[i].lat = data.lat;
 						connections[i].lng = data.lng;
 					}
-				}	
-				// set the marker changed to its new position 
-				// for(var i = 0; i < map.markers.length; i++){
-				// 	if(map.markers[i].id === data.id){
-				// 		map.markers[i].setPosition({
-				// 			lat: data.lat,
-				// 			lng: data.lng
-				// 		});
-				// 	}
-				// }
+				}
+
+				// set the marker changed to its new position
+				setMarkerPosition(data.id, data.lat, data.lng, map.markers);	 
 			});
 
 			socket.on('alert:msg', function(message){
@@ -264,8 +258,7 @@
 			// distance betwen my position and someone else's position
 			var distance = calcDistance(myPosition, otherPosition);
 
-			if(distance <= 2000 ){
-
+			if(distance <= 500 ){
 				// push user id, lat and lng to closestConnections
 				closestConnections.push(connections[i]);
 			} 
@@ -294,6 +287,18 @@
 				map.removeMarker(markers[i].markerObj);
 				// delete marker located in i index in markers
 				markers.splice(i, 1);
+			}
+		}
+	}
+
+	// change the position of a given marker id 
+	function setMarkerPosition(markerId, lat, lng, array){
+		for(var i = 0; i < array.length; i++){
+			if(map.markers[i].id === markerId){
+				map.markers[i].setPosition({
+					lat: lat,
+					lng: lng
+				});
 			}
 		}
 	}		
