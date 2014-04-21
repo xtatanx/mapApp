@@ -81,10 +81,13 @@
 	// search people near me
 	$search_btn.on('click', searchPeople);
 
+	// Handle form submission
 	$form.on('submit', function(e){
 		e.preventDefault();
 		var destiny = $destiny.val();
-		searchAddressByString(destiny);
+		var myPos = $mypos.val();
+		searchAddressByString(destiny, 'myDestiny');
+		searchAddressByString(myPos, 'myPosition');
 	});
 
 	// harvesina formula to calculate distances betwen point a and b
@@ -131,12 +134,13 @@
 
 
 	// search address by string
-	function searchAddressByString(addressString){
+	function searchAddressByString(addressString, typeOfMarker){
 		GMaps.geocode({
 		  address: addressString + "Bogota, Colombia",
 		  callback: function(results, status) {
-		    if (status === 'OK') {
-		    	console.log(results[0]);
+		  	console.log(results);
+		  	// check the type of marker and update its position every time the form is submitted
+		    if (status === 'OK' && typeOfMarker === 'myDestiny') {
 		    	if(searchByValue('myDestiny', 'id', map.markers)){
 						map.markers[1].setPosition({
 							lat: results[0].geometry.location.k,
@@ -144,7 +148,18 @@
 						});
 		    	}else{
     				createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'myDestiny');
-		    	}	    		
+		    	}
+					// pan to myDestiny marker
+		    	map.setCenter(results[0].geometry.location.k, results[0].geometry.location.A);	    		
+		    }else if (status === 'OK' && typeOfMarker === 'myPosition'){
+		    	if(searchByValue('myPosition', 'id', map.markers)){
+						map.markers[0].setPosition({
+							lat: results[0].geometry.location.k,
+							lng: results[0].geometry.location.A
+						});
+		    	}else{
+    				createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'myPosition');
+		    	}			    	
 		    }
 		  }
 		});		
