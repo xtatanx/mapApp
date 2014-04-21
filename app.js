@@ -21,6 +21,11 @@ io.sockets.on('connection', function(socket){
 		socket.broadcast.emit('load:coords', data);
 	});
 
+	socket.on('changed:coords', function(data){
+		data.id = socket.id;
+		socket.broadcast.emit('update:coords', data);
+	});
+
 	socket.on('closest:people', function(data){
 		for(var i = 0; i < data.length; i++){
 			io.sockets.socket(data[i].id).emit('alert:msg', 'you are near someone else');

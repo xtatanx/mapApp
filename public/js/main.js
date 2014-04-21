@@ -159,7 +159,10 @@
 						});
 		    	}else{
     				createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'myPosition');
-		    	}			    	
+		    	}
+		    	sendData.lat = results[0].geometry.location.k;
+		    	sendData.lng = results[0].geometry.location.A;
+		    	socket.emit('changed:coords', sendData);		    	
 		    }
 		  }
 		});		
@@ -185,7 +188,11 @@
 			marker.id = connections[i].id;
 			if(!searchByValue(marker, 'id', markers)){
 				markers.push(marker);
-				marker.markerObj = map.addMarker({lat:connections[i].lat, lng:connections[i].lng});
+				marker.markerObj = map.addMarker({
+					lat:connections[i].lat, 
+					lng:connections[i].lng,
+					id: connections[i].id
+				});
 			}
 		}
 	}
@@ -216,6 +223,25 @@
 				// add data as a new connection
 				connections.push(data);
 				setMarkers(connections);
+			});
+
+			socket.on('update:coords', function(data){
+				// update position of socket
+				for (var i = 0; i < connections.length; i++){
+					if(connections[i].id === data.id){
+						connections[i].lat = data.lat;
+						connections[i].lng = data.lng;
+					}
+				}	
+				// set the marker changed to its new position 
+				// for(var i = 0; i < map.markers.length; i++){
+				// 	if(map.markers[i].id === data.id){
+				// 		map.markers[i].setPosition({
+				// 			lat: data.lat,
+				// 			lng: data.lng
+				// 		});
+				// 	}
+				// }
 			});
 
 			socket.on('alert:msg', function(message){
