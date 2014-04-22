@@ -2,9 +2,16 @@
 	// CACHE SOME VARIABLES
 	var sendData = {
 		lat:0,
-		lng:0
+		lng:0,
+		address: 'string'
 	}
 
+	// reference to my destiny
+	var destiny = {
+		lat:0,
+		lng:0,
+		address: 'string'
+	}
 	// host that socket use to connect 
 	var host = location.origin.replace(/^http/, 'ws');
 
@@ -62,9 +69,7 @@
 			createMarker(sendData.lat, sendData.lng);
 
 			// search for my adress and place it in the input 'tu ubicacion'
-			searchAddressByCoords([sendData.lat, sendData.lng], function(adress){
-				$mypos.val('adress');
-			});
+			searchAddressByCoords([sendData.lat, sendData.lng]);
 
 			// initialize a socket connection 
 			createConnection();
@@ -119,13 +124,14 @@
 		  lng: adress[1],
 		  callback: function(results, status) {
 		    if (status === 'OK') {
+		    	console.log(results);
 		    	var adressArray = results[0].formatted_address.split(" ");
 		    	var adress= "" ;
 		    	//  i could extend string object to concatenate splitted objects like this one
 		    	for(var i = 0; i < 4; i ++){
 		    		adress += adressArray[i] + " ";
 		    	}
-
+		    	sendData.address = adress;
 	    		$mypos.val(adress);
 		    }
 		  }
@@ -136,7 +142,7 @@
 	// search address by string
 	function searchAddressByString(addressString, typeOfMarker){
 		GMaps.geocode({
-		  address: addressString + "Bogota, Colombia",
+		  address: addressString + " Bogota, Colombia",
 		  callback: function(results, status) {
 		  	console.log(results);
 		  	// check the type of marker and update its position every time the form is submitted
@@ -148,6 +154,12 @@
 		    	}else{
     				createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'myDestiny');
 		    	}
+					
+					// my destiny data in string adress and also coordinates
+					destiny.lat = results[0].geometry.location.k;
+					destiny.lng = results[0].geometry.location.A;
+					destiny.address = results[0].formatted_address;
+
 					// pan to myDestiny marker
 		    	map.setCenter(results[0].geometry.location.k, results[0].geometry.location.A);
 		    		    		
@@ -160,8 +172,11 @@
     				createMarker(results[0].geometry.location.k, results[0].geometry.location.A, 'myPosition');
 		    	}
 
+		    	// client data in string adress and also coordinates
 		    	sendData.lat = results[0].geometry.location.k;
 		    	sendData.lng = results[0].geometry.location.A;
+		    	sendData.address = results[0].formatted_address;
+
 		    	socket.emit('changed:coords', sendData);		    	
 		    }
 		  }
@@ -265,7 +280,17 @@
 		}
 
 		// emit event to people near me
-		socket.emit('closest:people', closestConnections);
+		socket.emit('closest:people', {
+			targets: closestConnections,
+			myAdress:{
+				lat: sendData.lat,
+				lng: sendData.lng
+			},
+			myDestiny:{
+				lat: 67,
+				lng:6767
+			}
+		});
 		// after emit event closest connections return to 0
 		closestConnections = [];
 	}
