@@ -27,9 +27,10 @@ io.sockets.on('connection', function(socket){
 	});
 
 	socket.on('closest:people', function(data){
-		for(var i = 0; i < data.length; i++){
-			io.sockets.socket(data[i].id).emit('alert:msg', 'you are near someone else');
-		}
+		console.log('closest people objects: ', data);
+		// for(var i = 0; i < data.length; i++){
+		// 	io.sockets.socket(data[i].id).emit('alert:msg', 'you are near someone else');
+		// }
 	});
 
 	socket.on('disconnect', function(){

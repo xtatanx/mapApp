@@ -19,7 +19,7 @@
 	var socket;
 
 	// handle connections and id's except mine
-	var connections = [];
+	connections = [];
 
 	// store markers currently placed in the map
 	var markers = [];
@@ -246,6 +246,7 @@
 					if(connections[i].id === data.id){
 						connections[i].lat = data.lat;
 						connections[i].lng = data.lng;
+						connections[i].address = data.address;
 					}
 				}
 
@@ -282,14 +283,8 @@
 		// emit event to people near me
 		socket.emit('closest:people', {
 			targets: closestConnections,
-			myAdress:{
-				lat: sendData.lat,
-				lng: sendData.lng
-			},
-			myDestiny:{
-				lat: 67,
-				lng:6767
-			}
+			myAdress:sendData,
+			myDestiny:destiny
 		});
 		// after emit event closest connections return to 0
 		closestConnections = [];
