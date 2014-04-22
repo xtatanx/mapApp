@@ -28,9 +28,12 @@ io.sockets.on('connection', function(socket){
 
 	socket.on('closest:people', function(data){
 		console.log('closest people objects: ', data);
-		// for(var i = 0; i < data.length; i++){
-		// 	io.sockets.socket(data[i].id).emit('alert:msg', 'you are near someone else');
-		// }
+		for(var i = 0; i < data['targets'].length; i++){
+			io.sockets.socket(data['targets'][i].id).emit('notify:travel', {
+				myAdress: data['myAdress'],
+				myDestiny: data['myDestiny']
+			});
+		}
 	});
 
 	socket.on('disconnect', function(){

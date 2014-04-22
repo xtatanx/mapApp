@@ -254,8 +254,9 @@
 				setMarkerPosition(data.id, data.lat, data.lng, map.markers);	 
 			});
 
-			socket.on('alert:msg', function(message){
-				alert(message);
+			// client is notified of someone near him looking for a travel
+			socket.on('notify:travel', function(travelInfo){
+				console.log(travelInfo);
 			});
 
 			socket.on('user:disconnected', function(id){
