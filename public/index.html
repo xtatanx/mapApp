@@ -28,6 +28,13 @@
             </form>
         </div>
         <div id="map"></div>
+        <div class="notifications">
+            Viajes <span class="notifications_indicator" id="notifications_indicator">0</span>
+            <div class="notifications_list">
+                <ul id="notifications_container">
+                </ul>
+            </div>
+        </div>
         <button id="search_people" type="button">Find people near me</button>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
@@ -37,6 +44,16 @@
         <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyABMg0H0KPSGs1wU2EWA5ckx9pPoHDhIEo&sensor=true">
         </script>        
         <script src="js/vendor/gmaps.js"></script>
+        <script src="js/vendor/handlebars-v1.3.0.js"></script>
         <script src="js/main.js"></script>
+        <script id="notification-template" type="text/template">
+            <li>
+                <p>Notification of a travel</p>
+                <p>from: {{myAddress.address}}</p>
+                <p>to: {{myDestiny.address}}</p>
+                <button>accept</button>
+                <button>decline</button>
+            </li>
+        </script>
     </body>
 </html>

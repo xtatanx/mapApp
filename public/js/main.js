@@ -19,13 +19,16 @@
 	var socket;
 
 	// handle connections and id's except mine
-	connections = [];
+	var connections = [];
 
 	// store markers currently placed in the map
 	var markers = [];
 
 	// store the closest conenctions to my position
 	var closestConnections = [];
+
+	// store an array of all the ective notifications
+	notifications = [];
 
 	// reference to my position input
 	var $mypos = $('#mypos');
@@ -39,14 +42,8 @@
 	// reference to search people btn
 	var $search_btn = $("#search_people");
 
-	// create a map in the "map" div, set the view to Bogota
-	window.map = new GMaps({
-	  div: '#map',
-	  lat: 4.596974,
-	  lng: -74.072978,
-	  zoom: 15
-	});
 
+	// HELPERS
 
 	// to radians
 	if (typeof (Number.prototype.toRad) === "undefined") {
@@ -54,6 +51,46 @@
 	        return this * 3.14 / 180;
 	    }
 	}	
+
+	var Notification = function(travelInfo){
+		this.travelInfo = travelInfo;
+		this.read = false;
+	}
+
+	Notification.prototype.init = function(){
+		this.addOne();
+		this.render();
+	}
+
+	Notification.prototype.render = function(){
+		var source = $('#notification-template').html();
+		console.log(source);
+		var template = Handlebars.compile(source);
+		var data = this.travelInfo;
+		console.log(data);
+		var result = template(data);
+		$('#notifications_container').append(result);
+	}
+
+	Notification.prototype.addOne = function(){
+		var number = +$('#notifications_indicator').html();
+		$('#notifications_indicator').html(number += 1);
+	}
+
+	Notification.prototype.removeOne = function(){
+		var number = +$('#notifications_indicator').html();
+		$('#notifications_indicator').html(number -= 1);
+	}
+
+	// END OF HELPERS
+
+	// create a map in the "map" div, set the view to Bogota
+	window.map = new GMaps({
+	  div: '#map',
+	  lat: 4.596974,
+	  lng: -74.072978,
+	  zoom: 15
+	});
 
 	// geolocate the conenction and place marker in the map
 	GMaps.geolocate({
@@ -256,7 +293,9 @@
 
 			// client is notified of someone near him looking for a travel
 			socket.on('notify:travel', function(travelInfo){
-				console.log(travelInfo);
+				var notification = new Notification(travelInfo);
+				notifications.push(notification);
+				notification.init();
 			});
 
 			socket.on('user:disconnected', function(id){

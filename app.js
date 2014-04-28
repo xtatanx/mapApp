@@ -30,7 +30,7 @@ io.sockets.on('connection', function(socket){
 		console.log('closest people objects: ', data);
 		for(var i = 0; i < data['targets'].length; i++){
 			io.sockets.socket(data['targets'][i].id).emit('notify:travel', {
-				myAdress: data['myAdress'],
+				myAddress: data['myAdress'],
 				myDestiny: data['myDestiny']
 			});
 		}
