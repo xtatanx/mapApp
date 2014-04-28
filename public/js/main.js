@@ -52,23 +52,28 @@
 	    }
 	}	
 
+	// the notification object
 	var Notification = function(travelInfo){
+		this.el = $('#notifications_container');
+		this.id = Math.random().toString().substring(7);
 		this.travelInfo = travelInfo;
 		this.read = false;
-	}
+
+	};
+
 
 	Notification.prototype.init = function(){
 		this.addOne();
 		this.render();
+		this.bindFunctions();
 	}
 
+	// render the view of a notification
 	Notification.prototype.render = function(){
 		var source = $('#notification-template').html();
-		console.log(source);
 		var template = Handlebars.compile(source);
 		var data = this.travelInfo;
-		console.log(data);
-		var result = template(data);
+		result = template(data);
 		$('#notifications_container').append(result);
 	}
 
@@ -80,6 +85,17 @@
 	Notification.prototype.removeOne = function(){
 		var number = +$('#notifications_indicator').html();
 		$('#notifications_indicator').html(number -= 1);
+	}
+
+	Notification.prototype.alertId= function(){
+		alert('the notification with id:' + this.id + ' is accepted');
+	}
+
+	Notification.prototype.bindFunctions = function(){
+		var self = this;
+		this.el.on('click', 'li .accept', function(){
+			self.alertId();
+		});
 	}
 
 	// END OF HELPERS
